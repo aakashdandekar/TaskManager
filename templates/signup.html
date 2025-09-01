@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Task Manager</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 50px;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff;
+      background: linear-gradient(90deg, #111, #000);
+      border-bottom: 2px solid #fff;
+    }
+
+    .main {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .task-box {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      width: 400px;
+    }
+
+    input {
+      width: 91%;
+      padding: 18px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 15px;
+      background: #111;
+      color: #fff;
+      box-shadow: inset 0 0 5px #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #e6e6e6;
+      box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    }
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-shadow: 0 0 5px #fff;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .signup-key-container {
+      margin-bottom: 25px;
+    }
+
+    .signup-key-container label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .key-boxes {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .key-box {
+      width: 20px !important;
+      height: 20px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 0;
+    }
+
+
+  </style>
+</head>
+<body>
+  <header>
+    Task Manager
+  </header>
+
+  <div class="main">
+    <div class="task-box">
+      <form id="signupForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <div class="signup-key-container">
+          <label>Sign-Up Key</label>
+          <div class="key-boxes">
+            <input type="text" class="key-box" maxlength="1" required>
+            <input type="text" class="key-box" maxlength="1" required>
+            <input type="text" class="key-box" maxlength="1" required>
+            <input type="text" class="key-box" maxlength="1" required>
+            <input type="text" class="key-box" maxlength="1" required>
+            <input type="text" class="key-box" maxlength="1" required>
+          </div>
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+      <p style="text-align: center; margin-top: 20px;"><a href="/login">Already have an account? Login</a></p>
+      <div id="message"></div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-focus and navigation for key boxes
+    const keyBoxes = document.querySelectorAll('.key-box');
+    keyBoxes.forEach((box, index) => {
+      box.addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (e.target.value && index < keyBoxes.length - 1) {
+          keyBoxes[index + 1].focus();
+        }
+      });
+      
+      box.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+          keyBoxes[index - 1].focus();
+        }
+      });
+    });
+
+    document.getElementById('signupForm').onsubmit = function(e) {
+      e.preventDefault();
+      
+      // Collect signup key from all boxes
+      const signupKey = Array.from(keyBoxes).map(box => box.value).join('');
+      
+      fetch('/signup', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          signup_key: signupKey,
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message && data.message.includes('successfully')) {
+          window.location.href = '/login';
+        } else {
+          document.getElementById('message').innerHTML = data.message || data.error;
+        }
+      })
+      .catch(error => {
+        document.getElementById('message').innerHTML = 'Signup failed. Please try again.';
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Task Manager</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 50px;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff;
+      background: linear-gradient(90deg, #111, #000);
+      border-bottom: 2px solid #fff;
+    }
+
+    .main {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      width: 300px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-align: center;
+    }
+
+    .card:hover {
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+    }
+
+    .overlay-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+      width: 400px;
+    }
+
+    input {
+      width: 91%;
+      padding: 18px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 15px;
+      background: #111;
+      color: #fff;
+      box-shadow: inset 0 0 5px #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+
+    button:hover {
+      background: #e6e6e6;
+      box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    }
+
+    .close-btn {
+      background: #ff4444;
+      color: #fff;
+    }
+
+    .delete-btn {
+      background: #ff6666;
+      color: #fff;
+      width: auto;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-item {
+      background: #111;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="admin-btn" onclick="goToDashboard()" style="position: absolute; top: 20px; left: 20px; width: auto; padding: 8px 16px; font-size: 14px; background: #4CAF50; color: #fff; border: none; border-radius: 8px; cursor: pointer;">Back to Dashboard</button>
+    Admin Panel
+  </header>
+
+  <div class="main">
+    <div class="card" onclick="showSignupKeyOverlay()">
+      <h3>Update Signup Key</h3>
+      <p>Change the signup key for new user registration</p>
+    </div>
+    
+    <div class="card" onclick="showUserManagementOverlay()">
+      <h3>Manage Users</h3>
+      <p>View all users and delete accounts</p>
+    </div>
+    
+    <div class="card" onclick="showAdminProfileOverlay()">
+      <h3>Password Update</h3>
+      <p>Update admin password</p>
+    </div>
+  </div>
+
+  <!-- Signup Key Overlay -->
+  <div id="signupKeyOverlay" class="overlay">
+    <div class="overlay-content">
+      <h3>Update Signup Key</h3>
+      <form id="adminForm">
+        <input type="text" id="newSignupKey" placeholder="New Signup Key (6 chars)" maxlength="6" required>
+        <button type="submit">Update Signup Key</button>
+        <button type="button" class="close-btn" onclick="closeOverlay('signupKeyOverlay')">Close</button>
+      </form>
+      <div id="message"></div>
+    </div>
+  </div>
+
+  <!-- User Management Overlay -->
+  <div id="userManagementOverlay" class="overlay">
+    <div class="overlay-content">
+      <h3 style="text-align: center;">User Management</h3>
+      <button type="button" class="close-btn" onclick="closeOverlay('userManagementOverlay')">Close</button>
+      <div id="userList"></div>
+      <div id="userMessage"></div>
+    </div>
+  </div>
+
+  <!-- Admin Profile Overlay -->
+  <div id="adminProfileOverlay" class="overlay">
+    <div class="overlay-content">
+      <h3>Update Admin Password</h3>
+      <form id="adminProfileForm">
+        <input type="password" id="adminNewPassword" placeholder="New Admin Password" required autocomplete="new-password">
+        <button type="submit">Update Password</button>
+        <button type="button" class="close-btn" onclick="closeOverlay('adminProfileOverlay')">Close</button>
+      </form>
+      <div id="adminProfileMessage"></div>
+    </div>
+  </div>
+
+  <script>
+    function showSignupKeyOverlay() {
+      document.getElementById('signupKeyOverlay').style.display = 'block';
+    }
+
+    function showUserManagementOverlay() {
+      document.getElementById('userManagementOverlay').style.display = 'block';
+      loadUsers();
+    }
+
+    function showAdminProfileOverlay() {
+      document.getElementById('adminProfileOverlay').style.display = 'block';
+    }
+
+    function closeOverlay(overlayId) {
+      document.getElementById(overlayId).style.display = 'none';
+    }
+
+    document.getElementById('adminForm').onsubmit = function(e) {
+      e.preventDefault();
+      const adminPassword = sessionStorage.getItem('password') || '2006';
+      fetch('/admin', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: 'admin',
+          password: adminPassword,
+          new_signup_key: document.getElementById('newSignupKey').value
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('message').innerHTML = data.message || data.error;
+        if (data.message) {
+          document.getElementById('newSignupKey').value = '';
+        }
+      });
+    };
+
+    function loadUsers() {
+      const adminPassword = sessionStorage.getItem('password') || '2006';
+      fetch('/get_users', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: 'admin', password: adminPassword})
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.users) {
+          let userHtml = '';
+          data.users.forEach(user => {
+            userHtml += `
+              <div class="user-item">
+                <span>${user.username} (${user.tasks} tasks)</span>
+                <button class="delete-btn" onclick="deleteUser('${user.username}')">Delete</button>
+              </div>
+            `;
+          });
+          document.getElementById('userList').innerHTML = userHtml;
+        } else {
+          document.getElementById('userMessage').innerHTML = data.error;
+        }
+      });
+    }
+
+    function deleteUser(username) {
+      const adminPassword = sessionStorage.getItem('password') || '2006';
+      fetch('/delete_user', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: 'admin',
+          password: adminPassword,
+          target_user: username
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('userMessage').innerHTML = data.message || data.error;
+        if (data.message) {
+          loadUsers(); // Reload user list
+        }
+      });
+    }
+
+    function goToDashboard() {
+      window.location.href = '/dashboard';
+    }
+
+    document.getElementById('adminProfileForm').onsubmit = function(e) {
+      e.preventDefault();
+      const newPassword = document.getElementById('adminNewPassword').value;
+      
+      fetch('/update_password', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: 'admin',
+          new_password: newPassword
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('adminProfileMessage').innerHTML = data.message || data.error;
+        if (data.message) {
+          sessionStorage.setItem('password', newPassword);
+          document.getElementById('adminNewPassword').value = '';
+          setTimeout(() => closeOverlay('adminProfileOverlay'), 2000);
+        }
+      });
+    };
+  </script>
+</body>
+</html>

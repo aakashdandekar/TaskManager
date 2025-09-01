@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+
+    /* Header */
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 50px;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 
+        0 0 2px #fff,
+        0 0 4px #fff,
+        0 0 6px #fff;
+      background: linear-gradient(90deg, #111, #000);
+      border-bottom: 2px solid #fff;
+      position: relative;
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: auto;
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #ff4444;
+      color: #fff;
+    }
+
+    .logout-btn:hover {
+      background: #ff6666;
+      box-shadow: 0 0 10px #ff4444;
+    }
+
+    .admin-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: auto;
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    .admin-btn:hover {
+      background: #45a049;
+      box-shadow: 0 0 10px #4CAF50;
+    }
+
+    .profile-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: auto;
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #2196F3;
+      color: #000;
+    }
+
+    .profile-btn:hover {
+      background: #1976D2;
+      box-shadow: 0 0 10px #2196F3;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+    }
+
+    .overlay-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+      width: 400px;
+    }
+
+    .overlay-content input {
+      width: 91%;
+      padding: 18px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 15px;
+      background: #111;
+      color: #fff;
+      box-shadow: inset 0 0 5px #fff;
+    }
+
+    .close-btn {
+      background: #ff4444;
+      color: #fff;
+      margin-top: 10px;
+    }
+
+    #profileMessage {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    /* Main container */
+    .main {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .task-box {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      width: 400px;
+    }
+
+    /* Input + Button */
+    #taskInput {
+      width: 91%;
+      padding: 18px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 15px;
+      background: #111;
+      color: #fff;
+      box-shadow: inset 0 0 5px #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #e6e6e6;
+      box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    }
+
+    /* Task list */
+    #taskList {
+      margin-top: 50px;
+      padding: 0;
+    }
+
+    #taskList li {
+      background: #111;
+      margin: 10px 0;
+      padding: 12px;
+      list-style: none;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 5px rgba(255,255,255,0.3);
+    }
+
+    #taskList li span {
+      flex-grow: 1;
+      margin-left: 10px;
+    }
+
+    #taskList li input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    /* Completed task style */
+    .completed {
+      text-decoration: line-through;
+      color: rgba(200,200,200,0.6);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <button class="admin-btn" onclick="checkAdmin()" style="display: none;" id="adminBtn">Admin Panel</button>
+    <button class="profile-btn" onclick="showProfileOverlay()" style="display: none;" id="profileBtn">👤</button>
+    Task Manager
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="task-box">
+      <input type="text" id="taskInput" placeholder="Enter new task">
+      <button onclick="addTask()">Add Task</button>
+      <ul id="taskList"></ul>
+    </div>
+  </div>
+
+  <!-- Profile Overlay -->
+  <div id="profileOverlay" class="overlay">
+    <div class="overlay-content">
+      <h3>Update Password</h3>
+      <form id="profileForm">
+        <input type="password" id="newPassword" placeholder="New Password" required>
+        <button type="submit">Update Password</button>
+        <button type="button" class="close-btn" onclick="closeProfileOverlay()">Close</button>
+      </form>
+      <div id="profileMessage"></div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
